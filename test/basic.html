@@ -1,0 +1,62 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <title>Puppeteer Test Suite</title>
+    <link rel='stylesheet' href='../node_modules/qunit/qunit/qunit.css'>
+  </head>
+  <body>
+    <div id='qunit'></div>
+    <div id='qunit-fixture'></div>
+    
+    <script src='../node_modules/qunit/qunit/qunit.js'></script>
+
+    <script>
+      if (/HeadlessChrome/.test(window.navigator.userAgent)) {
+        QUnit.config.autostart = false
+      }
+
+      QUnit.module('mod one', () => {
+        QUnit.test('one assertion', (assert) => {
+          assert.ok(true, 'true is ok')
+        })
+        QUnit.test('2 failed assertions', (assert) => {
+          assert.equal('this is fine', 'not fine', 'these should be equal')
+          assert.ok(false, 'true is not false')
+        })
+        QUnit.test('three assertions', (assert) => {
+          assert.equal(1, 1, 'one is one')
+          assert.deepEqual({ one: 1, foo: 'bar' }, { foo: 'bar', one: 1 }, 'props are equal')
+          assert.notOk(false, 'false is not ok')
+        })
+      })
+      QUnit.module('mod two', () => {
+        QUnit.module('sub one', () => {
+          QUnit.test('test sub one', (assert) => {
+            assert.equal('foo', 'foo', 'foo-foo')
+          })
+        })
+        QUnit.module('sub two', () => {
+          QUnit.test.todo('test sub two', (assert) => {
+            assert.equal('bar', 'bar', 'bar-bar')
+          })
+        })
+      })
+      QUnit.module('mod three', () => {
+        QUnit.test('async test', (assert) => {
+          const done = assert.async()
+          fetch('/test/basic.html')
+            .then((resp) => {
+              assert.equal(resp.status, 200, 'can do async fetch')
+              done()
+            })
+        })
+        QUnit.test.skip('skipped test', (assert) => {
+          assert.notStrictEqual('1', 1, 'one is not one strictly')
+        })
+        QUnit.test('final test', (assert) => {
+          assert.equal('1', 1, 'one is one in different forms')
+        })
+      })
+    </script>
+  </body>
+</html>
