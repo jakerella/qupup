@@ -11,7 +11,7 @@
     <script src='../node_modules/qunit/qunit/qunit.js'></script>
 
     <script>
-      if (/HeadlessChrome/.test(window.navigator.userAgent)) {
+      if (/headless/i.test(window.navigator.userAgent)) {
         QUnit.config.autostart = false
       }
 

@@ -26,7 +26,7 @@ function sendLog(context) {
 
 /**
  * @typedef {object} serverOptions Options for the local, static HTTP server
- * @property {boolean} skipServer If true, this code will not start a local, static HTTP server
+ * @property {boolean} startServer If true, this code will start a local, static HTTP server
  * @property {string} testBaseDir The base directory for the project
  * @property {number} port The port to run the http server on
  */
@@ -37,6 +37,7 @@ function sendLog(context) {
  * @param {number} timeout Overall test run timeout (in ms)
  * @param {number} testTimeout Individual test timeout (in ms)
  * @param {serverOptions} serverOptions The options for the static server
+ * @param {object} reporter An object that implements the QUnit reporter API (https://qunitjs.com/api/reporters/)
  * @returns {Promise<object>} Resolves with the test stats
  */
 export async function testRunner(targetURLs, timeout=30000, testTimeout=2000, serverOptions, reporter) {
@@ -52,7 +53,7 @@ export async function testRunner(targetURLs, timeout=30000, testTimeout=2000, se
     qunitReporter = reporter
   }
 
-  if (!serverOptions.skipServer) {
+  if (serverOptions.startServer) {
     serverProc = await startServer(serverOptions.testBaseDir, serverOptions.port)
     if (!serverProc) {
       return Promise.reject(new Error('HTTP server never started.'))
@@ -69,7 +70,7 @@ export async function testRunner(targetURLs, timeout=30000, testTimeout=2000, se
     } catch (err) {
       await killServerProcess()
       let errMessage = err.message || String(err)
-      if (/timeout/.test(err)) {
+      if (/wait timer timed out/i.test(err)) {
         errMessage = 'HTTP server never started (timeout).'
       } else if (err instanceof Error) {
         const errMatch = errMessage.match(/Error: ([^\n]+)/)
@@ -102,7 +103,7 @@ function startServer(testBaseDir, port) {
   return new Promise((resolve, _) => {
     const server = spawn(
       'node',
-      [path.resolve(testBaseDir, 'node_modules', 'http-server', 'bin', 'http-server'), '-c-1', `-p ${port}`, '.'],
+      [path.resolve('.', 'node_modules', 'http-server', 'bin', 'http-server'), '-c-1', `-p ${port}`, testBaseDir],
       { encoding: 'utf8' }
     )
     
@@ -113,8 +114,8 @@ function startServer(testBaseDir, port) {
       await killServerProcess()
     })
     function checkForStart(output) {
-      if (/available/i.test(output)) {
-        sendLog({ source: 'console', name: 'info', message: `HTTP server up and running on port ${port}`})
+      if (/available/i.test(output.toString())) {
+        sendLog({ source: 'console', name: 'info', message: `HTTP server running at http://localhost:${port} from ${testBaseDir}`})
         server.ready = true
         server.stdout.off('data', checkForStart)
       }
@@ -206,6 +207,9 @@ async function startTests(page, targetURL) {
     }
 
   } catch (err) {
+    if (/qunit is not defined/i.test(err.message || err)) {
+      return sendLog({ source: 'console', name: 'error', message: '\nThis does not appear to be a QUnit test page.'})
+    }
     sendLog({ source: 'console', name: 'error', message: `\nTest Error: ${err.message || err}`})
     if (!err.stack) {
       Error.captureStackTrace(err)

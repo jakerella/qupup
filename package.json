@@ -1,14 +1,17 @@
 {
-  "name": "qunit-puppeteer",
+  "name": "qupup",
   "version": "2.0.0",
   "description": "A test harness for running QUnit tests in headless Chromium",
   "type": "module",
   "bin": {
-    "qunit-puppeteer": "bin/qunit-puppeteer-runner.js"
+    "qupup": "bin/qupup-runner.js"
+  },
+  "scripts": {
+    "test": "./test/test-runner.sh"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jakerella/qunit-puppeteer.git"
+    "url": "git+https://github.com/jakerella/qupup.git"
   },
   "dependencies": {
     "commander": "^14.0.3",
@@ -27,11 +30,7 @@
     "browser",
     "testing"
   ],
-  "author": "David Taylor",
-  "contributors": ["Jordan Kasper"],
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/jakerella/qunit-puppeteer/issues"
-  },
-  "homepage": "https://github.com/jakerella/qunit-puppeteer#readme"
+  "author": "Jordan Kasper",
+  "contributors": ["David Taylor"],
+  "license": "MIT"
 }

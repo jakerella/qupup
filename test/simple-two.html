@@ -1,0 +1,38 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <title>Puppeteer More Simple Test Suite</title>
+    <link rel='stylesheet' href='../node_modules/qunit/qunit/qunit.css'>
+  </head>
+  <body>
+    <div id='qunit'></div>
+    <div id='qunit-fixture'></div>
+    
+    <script src='../node_modules/qunit/qunit/qunit.js'></script>
+
+    <script>
+      if (/headless/i.test(window.navigator.userAgent)) {
+        QUnit.config.autostart = false
+      }
+
+      QUnit.module('more tests', () => {
+        QUnit.test('one assertion', (assert) => {
+          assert.ok(true, 'true is ok')
+        })
+        QUnit.test('async test', (assert) => {
+          const done = assert.async()
+          fetch('/test/basic.html')
+            .then((resp) => {
+              assert.equal(resp.status, 200, 'can do async fetch')
+              done()
+            })
+        })
+        QUnit.test('three assertions', (assert) => {
+          assert.equal(1, 1, 'one is one')
+          assert.deepEqual({ one: 1, foo: 'bar' }, { foo: 'bar', one: 1 }, 'props are equal')
+          assert.notOk(false, 'false is not ok')
+        })
+      })
+    </script>
+  </body>
+</html>
